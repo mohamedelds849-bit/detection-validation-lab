@@ -1,0 +1,42 @@
+title: PowerShell Launched With an Encoded Command
+id: 8112e92f-c82f-4a42-b9ee-11982cceae00
+status: test
+description: >
+  Detects powershell.exe or pwsh.exe started with -EncodedCommand (or one of its
+  accepted abbreviations such as -e, -ec, -en, -enc). Encoding hides the real command
+  from a quick look at the command line. Expected to fire on Atomic Red Team test
+  a50d5a97 (T1027) in the CI telemetry job.
+references:
+  - https://attack.mitre.org/techniques/T1027/010/
+  - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.stealth
+  - attack.execution
+  - attack.t1027.010
+  - attack.t1059.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith:
+        - '\powershell.exe'
+        - '\pwsh.exe'
+    - OriginalFileName:
+        - 'PowerShell.EXE'
+        - 'pwsh.dll'
+  selection_flag:
+    CommandLine|contains:
+      - ' -e '
+      - ' -ec '
+      - ' -en'
+      - ' /e '
+      - ' /ec '
+      - ' /en'
+  condition: all of selection_*
+falsepositives:
+  - Management agents (SCCM, some RMM tools) that launch encoded PowerShell
+  - A command line that contains the text " -en" inside a quoted string
+level: medium

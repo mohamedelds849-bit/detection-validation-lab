@@ -1,0 +1,31 @@
+title: Mshta Spawns a Shell or Script Interpreter
+id: b23096aa-9a72-4091-a45e-ddba59796c94
+status: test
+description: >
+  Detects mshta.exe (the HTML Application host) starting PowerShell, cmd, wscript,
+  cscript or rundll32. Legitimate HTA applications are rare on modern endpoints; a
+  shell child of mshta is a classic proxy-execution pattern.
+references:
+  - https://attack.mitre.org/techniques/T1218/005/
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.stealth
+  - attack.t1218.005
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    ParentImage|endswith: '\mshta.exe'
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+      - '\cmd.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+      - '\rundll32.exe'
+  condition: selection
+falsepositives:
+  - Old line-of-business HTA applications that call scripts
+level: high

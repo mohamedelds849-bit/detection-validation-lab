@@ -1,0 +1,49 @@
+title: Local Reconnaissance Tool Executed (Building Block)
+id: c4aebf11-32d1-4493-aa07-1fb34fe77147
+status: test
+description: >
+  Building block, not an alert. Records the execution of built-in tools used to learn
+  who we are and what the machine is (whoami, systeminfo, quser, qwinsta, cmdkey /list,
+  net user / localgroup / group / accounts). Each one alone is normal admin activity;
+  the correlation rule dvl_005 raises an alert when several of them run in a burst.
+references:
+  - https://attack.mitre.org/techniques/T1033/
+  - https://attack.mitre.org/techniques/T1082/
+  - https://attack.mitre.org/techniques/T1087/001/
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.discovery
+  - attack.t1033
+  - attack.t1082
+  - attack.t1087.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_simple:
+    Image|endswith:
+      - '\whoami.exe'
+      - '\systeminfo.exe'
+      - '\quser.exe'
+      - '\qwinsta.exe'
+  selection_cmdkey_img:
+    Image|endswith: '\cmdkey.exe'
+  selection_cmdkey_cmd:
+    CommandLine|contains:
+      - '/l'
+      - '-l'
+  selection_net_img:
+    Image|endswith:
+      - '\net.exe'
+      - '\net1.exe'
+  selection_net_cmd:
+    CommandLine|contains:
+      - ' user'
+      - ' localgroup'
+      - ' group'
+      - ' accounts'
+  condition: selection_simple or (selection_cmdkey_img and selection_cmdkey_cmd) or (selection_net_img and selection_net_cmd)
+falsepositives:
+  - Administrators, login scripts and inventory agents (this is why it is only a building block)
+level: informational

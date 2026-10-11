@@ -1,0 +1,32 @@
+title: Scheduled Task Created With schtasks.exe
+id: 9399cdca-775f-4816-ae02-2d0c1860ff10
+status: test
+description: >
+  Detects the creation of a scheduled task from the command line (schtasks /create).
+  Scheduled tasks are a common way to persist or to run a program later.
+  /query and /delete are not matched.
+references:
+  - https://attack.mitre.org/techniques/T1053/005/
+  - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks-create
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.execution
+  - attack.persistence
+  - attack.privilege-escalation
+  - attack.t1053.005
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith: '\schtasks.exe'
+    - OriginalFileName: 'schtasks.exe'
+  selection_create:
+    CommandLine|contains:
+      - '/create'
+      - '-create'
+  condition: all of selection_*
+falsepositives:
+  - Software installers and administrators creating legitimate tasks
+level: medium

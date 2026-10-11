@@ -1,0 +1,34 @@
+title: Value Written Under a Registry Run Key
+id: 9c3eb6b3-c30a-4af9-9dcf-2deb4c6b6e96
+status: test
+description: >
+  Detects a value written under the Run / RunOnce keys (user or machine), which makes
+  a program start at every logon. Writes by programs installed under Program Files are
+  filtered out (installers and updaters).
+references:
+  - https://attack.mitre.org/techniques/T1547/001/
+  - https://learn.microsoft.com/en-us/windows/win32/setupapi/run-and-runonce-registry-keys
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.persistence
+  - attack.privilege-escalation
+  - attack.t1547.001
+logsource:
+  category: registry_set
+  product: windows
+detection:
+  selection:
+    TargetObject|contains:
+      - '\Software\Microsoft\Windows\CurrentVersion\Run\'
+      - '\Software\Microsoft\Windows\CurrentVersion\RunOnce\'
+      - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run\'
+      - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\'
+  filter_program_files:
+    Image|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  condition: selection and not 1 of filter_*
+falsepositives:
+  - Per-user applications installed under AppData that register themselves at logon
+level: medium

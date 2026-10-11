@@ -1,0 +1,26 @@
+title: Local User Account Created (Security 4720)
+id: 8bf1af52-c236-4fbc-ab28-79f7dccbdfa0
+status: test
+description: >
+  Detects the creation of a user account (Security event 4720, audit "User Account
+  Management" success). On a workstation or member server, a new local account
+  outside of a provisioning process deserves a check.
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+  - https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4720
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.persistence
+  - attack.t1136.001
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4720
+  condition: selection
+falsepositives:
+  - Provisioning of new employees or of service accounts (check the ticket)
+  - First-boot setup of a new machine (defaultuser0)
+level: medium

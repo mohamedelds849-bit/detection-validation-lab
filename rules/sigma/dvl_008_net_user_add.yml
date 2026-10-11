@@ -1,0 +1,30 @@
+title: Local User Added With net.exe
+id: 528eef9b-687e-4077-a196-167d45ce93fe
+status: test
+description: >
+  Detects "net user <name> <password> /add" on the command line. Complements dvl_007:
+  dvl_007 sees the result in the Security log, this rule sees the command in Sysmon,
+  so one detection survives if the other log source is missing.
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.persistence
+  - attack.t1136.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    Image|endswith:
+      - '\net.exe'
+      - '\net1.exe'
+  selection_cmd:
+    CommandLine|contains|all:
+      - ' user'
+      - '/add'
+  condition: all of selection_*
+falsepositives:
+  - Administrator scripts that create local accounts
+level: medium

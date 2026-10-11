@@ -1,0 +1,33 @@
+title: Burst of Local Reconnaissance Commands
+id: 49f05114-7ad3-4f0a-8912-cd1db57fd8e9
+status: test
+description: >
+  Alert when at least 3 different reconnaissance command lines (building block dvl_004)
+  are started by the same parent process within 5 minutes. One whoami is admin noise;
+  whoami + net user + net localgroup + cmdkey /list from one shell looks like someone
+  (or a script) discovering the machine. Chainsaw does not run Sigma correlations, so
+  this rule is evaluated by dvl/correlate.py, which reads its parameters from this file.
+references:
+  - https://sigmahq.io/docs/meta/correlations.html
+  - https://attack.mitre.org/tactics/TA0007/
+author: Mohamed Elansari
+date: 2026-10-11
+tags:
+  - attack.discovery
+  - attack.t1033
+  - attack.t1082
+  - attack.t1087.001
+correlation:
+  type: value_count
+  rules:
+    - c4aebf11-32d1-4493-aa07-1fb34fe77147
+  group-by:
+    - Computer
+    - ParentProcessGuid
+  timespan: 5m
+  condition:
+    gte: 3
+    field: CommandLine
+falsepositives:
+  - Inventory or login scripts that run several of these tools from one parent
+level: high
