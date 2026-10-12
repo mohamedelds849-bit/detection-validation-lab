@@ -24,6 +24,8 @@ foreach ($test in $plan.tests) {
     $end = Get-UtcStamp
     Add-Phase -Id $test.id -Start $start -End $end -Status $status -Message $message -Guid $test.guid
 
+    # Wait past the 5 s grace period so cleanup events are never attributed to the test.
+    Start-Sleep -Seconds 7
     try {
         Invoke-AtomicTest $folder -TestGuids $test.guid -PathToAtomicsFolder $atomics -Cleanup | Out-Host
     } catch {

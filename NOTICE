@@ -1,0 +1,17 @@
+detection-validation-lab - third-party material
+
+1. tests/data/real_evtx/*.evtx
+   Copied (renamed) from SigmaHQ regression_data, commit da9bb07d642a2826e89702445d32c795209ec108
+   https://github.com/SigmaHQ/sigma - Detection Rule License (DRL) 1.1
+   https://github.com/SigmaHQ/Detection-Rule-License
+   Recorded by the SigmaHQ team; used unchanged as test data.
+
+2. Downloaded in CI, NOT redistributed in this repository:
+   - Chainsaw 2.16.5 (WithSecure) - GPL-3.0
+   - Nextron Systems evtx-baseline v0.8.5 (win10-client.tgz)
+   - SigmaHQ regression_data (same commit as above) - DRL 1.1
+   - Sysmon (Microsoft Sysinternals) - Sysinternals license
+   - sysmon-config by SwiftOnSecurity, commit 1836897f - see the license of that repository
+   - Atomic Red Team atomics, commit 388942ad, and Invoke-AtomicRedTeam 2.3.0 (Red Canary) - MIT
+
+My own code and rules: MIT (LICENSE).
