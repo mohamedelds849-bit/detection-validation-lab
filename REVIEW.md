@@ -14,6 +14,7 @@ Reviewer stance: SOC lead who will ask "did it really run, on what, and how nois
 | 3 mutations on real samples (wmic branch removed, base64 length 20→2000, schtasks any verb) | all 3 caught |
 | PowerShell CI scripts | parsed with the PowerShell parser: 0 errors. **Not executed** (they install Sysmon and run Atomic tests: runner only) |
 | Workflow YAML | parses; **never run** |
+| gitleaks 8 (`git` on 6 commits + `dir`) | no leaks found |
 
 ## Problems found and fixed during the build
 
@@ -64,7 +65,7 @@ Reviewer stance: SOC lead who will ask "did it really run, on what, and how nois
 - The scripts in `lab/ci/` refuse nothing by themselves: README and LEARN say clearly not
   to run them on a personal or company PC.
 - No secrets: Atomic A8's default password lives in the upstream test, not in this repo;
-  gitleaks run on the repository (see below).
+  gitleaks: no leaks (table above).
 
 ## Recommendations (next steps)
 
