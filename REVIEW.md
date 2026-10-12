@@ -13,7 +13,7 @@ Reviewer stance: SOC lead who will ask "did it really run, on what, and how nois
 | Gate 3 on the 8 vendored samples | PASS |
 | 3 mutations on real samples (wmic branch removed, base64 length 20→2000, schtasks any verb) | all 3 caught |
 | PowerShell CI scripts | parsed with the PowerShell parser: 0 errors. **Not executed** (they install Sysmon and run Atomic tests: runner only) |
-| Workflow YAML | parses; **never run** |
+| Workflow YAML | first CI run `38193919332` (2026-10-12): 4/4 jobs green |
 | gitleaks 8 (`git` on 6 commits + `dir`) | no leaks found |
 
 ## Problems found and fixed during the build
@@ -35,7 +35,7 @@ Reviewer stance: SOC lead who will ask "did it really run, on what, and how nois
 
 ## Limits that remain (honest list)
 
-- **Gate 1 has never run.** Likely first-run issues: Defender on the runner blocking the
+- **Gate 1 first run (2026-10-12, run `38193919332`): PASS.** 8/8 Atomic tests fired their rule (A7 mshta included: Defender did not block it on this runner), 0 false positives in the benign phase, 10 dvl_004 hits during setup (outside any phase, not gated), mutant gate red as designed. Risks that remain for future runs: Defender on the runner blocking the
   mshta test (then A7 = MISSED — a real finding, to document, not to hide); Sysmon or
   module download failures; a different Sysmon field format on Server 2025. Until the
   first green run, nothing may be claimed about real-telemetry detection rates.

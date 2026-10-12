@@ -204,10 +204,10 @@ EVTX du runner dans le Wazuh de soc-detection-lab.
 ## 7. Lignes de CV (§7 du DIRECTOR-AUDIT : max 3 lignes, chiffres vrais, une réserve)
 
 **FR — tant que la CI n'a pas tourné :**
-- **Detection Validation Lab** (Sigma, Sysmon, Chainsaw, Python, GitHub Actions) : 8 détections Windows mappées ATT&CK v19, testées sur journaux réels : bruit ramené de 32 à 5 alertes justifiées sur une baseline Windows 10 propre (342 000 événements Sysmon), 0 alerte inattendue sur 204 enregistrements d'attaque SigmaHQ. 92 tests. Validation par tests Atomic Red Team sur runner Windows : CI prête, pas encore exécutée.
+- **Detection Validation Lab** (Sigma, Sysmon, Chainsaw, Python, GitHub Actions) : 8 détections Windows mappées ATT&CK v19, testées sur journaux réels : bruit ramené de 32 à 5 alertes justifiées sur une baseline Windows 10 propre (342 000 événements Sysmon), 0 alerte inattendue sur 204 enregistrements d'attaque SigmaHQ. 92 tests. 8/8 tests Atomic Red Team détectés sur un runner Windows Server 2025 + Sysmon en CI, 0 faux positif en phase bénigne.
 
 **EN — until the CI has run:**
-- **Detection Validation Lab** (Sigma, Sysmon, Chainsaw, Python, GitHub Actions): 8 ATT&CK v19 Windows detections tested on real logs: noise cut from 32 to 5 justified alerts on a clean Windows 10 baseline (342k Sysmon events), 0 unexpected alert on 204 SigmaHQ attack recordings. 92 tests. Atomic Red Team validation on a Windows CI runner: built, not run yet.
+- **Detection Validation Lab** (Sigma, Sysmon, Chainsaw, Python, GitHub Actions): 8 ATT&CK v19 Windows detections tested on real logs: noise cut from 32 to 5 justified alerts on a clean Windows 10 baseline (342k Sysmon events), 0 unexpected alert on 204 SigmaHQ attack recordings. 92 tests. 8/8 Atomic Red Team tests detected on a Windows Server 2025 + Sysmon CI runner, 0 false positives in the benign phase.
 
 *(Après un run vert : remplacer la dernière phrase par « validées en CI sur Sysmon réel avec 8 tests Atomic Red Team (N/8), régression volontaire = build rouge ». Mettre le vrai N.)*
 

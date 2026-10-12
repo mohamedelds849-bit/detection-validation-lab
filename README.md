@@ -6,7 +6,7 @@ SigmaHQ tests its own rules — **on real event logs, never on log lines I wrote
 
 | Gate | Real data | Question it answers | Status |
 |---|---|---|---|
-| 1. **Telemetry** | a fresh GitHub Windows runner + **Sysmon**, benign admin activity, then **8 standard Atomic Red Team tests** | Does each rule fire on the real events of its technique, and stay silent on normal admin work? | **CI only — not run yet** (see below) |
+| 1. **Telemetry** | a fresh GitHub Windows runner + **Sysmon**, benign admin activity, then **8 standard Atomic Red Team tests** | Does each rule fire on the real events of its technique, and stay silent on normal admin work? | **CI only — PASS 8/8, 0 false positives** (run `38193919332`, 2026-10-12) |
 | 2. **Goodlog** | Nextron `evtx-baseline` Windows 10 client: 342,116 Sysmon events + Security log of a real, used machine | How noisy is each rule on a clean machine? | **Run locally: PASS** (5 alert hits, all accepted with a written reason) |
 | 3. **Samples** | SigmaHQ regression corpus: 204 real EVTX attack recordings (+ 8 vendored in the repo) | Do the rules fire where expected, and only there? | **Run locally: PASS** (3/3 expected hits, 0 unexpected) |
 
@@ -18,7 +18,7 @@ compares the hits with written expectations.
 **Status (2026-10-12):** rules, `dvl`, 92 tests and the workflow are built. Gates 2 and 3
 were run on my PC (Windows 11, Chainsaw 2.16.5). **Gate 1 needs a Windows machine with
 Sysmon on which running Atomic tests is acceptable: it runs only in GitHub Actions and
-has not run yet** — its numbers are unknown until the first green run.
+first ran on 2026-10-12 (run `38193919332`): **8/8 Atomic tests detected by their rule, 0 false positives in the benign admin phase**, on Windows Server 2025 + Sysmon 15.22. The deliberately broken rule (mshta mutant) made the gate fail, as it should.
 
 > Defensive only. No exploit, no attack code: the CI runs unmodified, benign Atomic Red
 > Team tests (print text, list users, create then delete a task / Run value / local user)
@@ -116,7 +116,7 @@ policy and run Atomic tests.
 | Gate 2, same baseline, rules **v2** | **5 alert hits, all accepted** (3 Run key, 1 schtasks, 1 user created) + 1 building block |
 | Gate 3, SigmaHQ corpus (204 EVTX, commit `da9bb07d`) | 3 hits = 3 expected, 0 unexpected |
 | Gate 3, 8 vendored samples | 8/8 as expected (incl. 2 documented gaps) |
-| Gate 1, CI Windows runner | **not run yet** |
+| Gate 1, CI Windows runner (Windows Server 2025, Sysmon 15.22, run `38193919332`) | **8/8 PASS, 0 false positives**; mutant rule correctly fails the gate |
 
 Local reports: [reports/](reports/).
 
