@@ -1,0 +1,57 @@
+# Accepted false positives, per dataset. This is an ENVIRONMENT allow-list (what a SOC
+# keeps per client), not a rule change: the rule stays generic, and each accepted hit is
+# written down with the reason, like a tuning ticket.
+#
+# The goodlog gate fails on any alert hit NOT covered here. An entry that never matches
+# is reported as "stale" so the list does not rot.
+#
+# How these were found: docs/TUNING.md (v1 rules: 32 alert hits on the Nextron Windows
+# 10 client baseline; v2 rules: 5; the 5 below).
+
+datasets:
+  nextron-win10-client:
+    - rule: dvl_003
+      where:
+        - {field: Details, op: contains, value: '\AppData\Roaming\Spotify\Spotify.exe'}
+        - {field: Image, op: contains, value: '\AppData\Roaming\Spotify\'}
+      reason: >
+        Spotify (per-user install in AppData) registers itself in HKCU Run. A per-user app
+        in a user-writable folder is exactly what malware also does, so the rule is not
+        changed; the exact app + path is accepted for this machine only.
+
+    - rule: dvl_003
+      where:
+        - {field: TargetObject, op: contains, value: '\CurrentVersion\RunOnce\Uninstall '}
+        - {field: Details, op: contains, value: '\AppData\Local\Microsoft\OneDrive\'}
+      reason: >
+        OneDrive updater: RunOnce "Uninstall <version>" removes the old version folder at
+        next logon (cmd.exe rmdir). Written by the OneDrive setup running from %TEMP%.
+
+    - rule: dvl_003
+      where:
+        - {field: Details, op: equals, value: 'grpconv -o'}
+      reason: >
+        grpconv (Windows Program Group Converter) RunOnce set by an installer. Built-in
+        Windows binary with a fixed argument.
+
+    - rule: dvl_002
+      where:
+        - {field: CommandLine, op: contains, value: '/TN "klcp_update"'}
+        - {field: ParentImage, op: contains, value: '\AppData\Local\Temp\is-'}
+      reason: >
+        K-Lite Codec Pack installer (Inno Setup, extracted to %TEMP%\is-*.tmp) creates its
+        update task from an XML file. Installers from %TEMP% cannot be filtered in the
+        rule (attackers run from %TEMP% too), so this one is accepted by name.
+
+    - rule: dvl_007
+      where:
+        - {field: TargetUserName, op: equals, value: 'user'}
+        - {field: SubjectUserName, op: endswith, value: '$'}
+      reason: >
+        First local account created by Windows setup (OOBE): the subject is the machine
+        account, the account is the one the owner chose at install. Expected once per
+        new machine.
+
+  # Benign phase of the CI runner: empty on purpose. Anything that fires there is a
+  # false positive until someone writes the reason here.
+  ci-runner: []

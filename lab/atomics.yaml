@@ -1,0 +1,78 @@
+# Atomic Red Team tests executed on the disposable GitHub Actions Windows runner
+# (job "telemetry" in .github/workflows/detection-validation.yml).
+#
+# Selection rules (see docs/ATOMICS.md for the per-test safety review):
+#   - standard tests from the official atomics folder, run with Invoke-AtomicRedTeam,
+#     identified by their auto_generated_guid and pinned to one commit;
+#   - benign payloads only: Write-Host, discovery commands, a task / Run value / local
+#     user that point to nothing harmful, each removed by the test's cleanup command;
+#   - no credential access, no download, no defense impairment, no lateral movement;
+#   - the runner is destroyed at the end of the job.
+#
+# "expect" = the rules (short keys = file names in rules/) that MUST fire inside the
+# test's time window. Other alert rules firing in the window are reported as "extra".
+
+atomic_red_team:
+  atomics_repo: https://github.com/redcanaryco/atomic-red-team
+  atomics_commit: 388942adbd9641f4dfdcf079d7efe9a75ec0ac43
+  invoke_atomicredteam_version: 2.3.0
+  powershell_yaml_version: 0.4.12
+
+benign_phase: benign
+
+tests:
+  - id: A1
+    technique: T1027
+    guid: a50d5a97-2531-499e-a1de-5544c74432c6
+    name: Execute base64-encoded PowerShell
+    payload: powershell.exe -EncodedCommand <base64 of Write-Host "Hey, Atomic!">
+    expect: [dvl_001]
+
+  - id: A2
+    technique: T1053.005
+    guid: 42f53695-ad4a-4546-abb6-7d837f644a71
+    name: Scheduled task Local
+    payload: SCHTASKS /Create /SC ONCE /TN spawn /TR cmd.exe /ST 20:10 (deleted by cleanup)
+    expect: [dvl_002]
+
+  - id: A3
+    technique: T1547.001
+    guid: e55be3fd-3521-4610-9d1a-e210e42dcf05
+    name: Reg Key Run
+    payload: REG ADD HKCU\...\Run /V "Atomic Red Team" /D C:\Path\AtomicRedTeam.exe (file does not exist; deleted by cleanup)
+    expect: [dvl_003]
+
+  - id: A4
+    technique: T1082
+    guid: 66703791-c902-4560-8770-42b8a91f7667
+    name: System Information Discovery
+    payload: systeminfo; reg query HKLM\SYSTEM\CurrentControlSet\Services\Disk\Enum
+    expect: [dvl_004]
+
+  - id: A5
+    technique: T1087.001
+    guid: 80887bec-5a9b-4efc-a81d-f83eb2eb32ab
+    name: Enumerate all accounts on Windows (Local)
+    payload: net user; dir c:\Users\; cmdkey.exe /list; net localgroup "Users"; net localgroup
+    expect: [dvl_004, dvl_005]
+
+  - id: A6
+    technique: T1033
+    guid: aab580c7-cc30-4a7c-b5a9-46a29066b022
+    name: User Discovery - whoami
+    payload: whoami /all
+    expect: [dvl_004]
+
+  - id: A7
+    technique: T1218.005
+    guid: 8707a805-2b76-4f32-b1c0-14e558205772
+    name: Mshta used to Execute PowerShell
+    payload: mshta about:<hta> -> WScript.Shell.Run powershell Write-Host "Hello, MSHTA!"
+    expect: [dvl_006]
+
+  - id: A8
+    technique: T1136.001
+    guid: 6657864e-0323-4206-9344-ac9cd7265a4f
+    name: Create a new user in a command prompt
+    payload: net user /add "T1136.001_CMD" <default test password> (deleted by cleanup)
+    expect: [dvl_004, dvl_007, dvl_008]

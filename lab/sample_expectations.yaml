@@ -1,0 +1,25 @@
+# Real EVTX samples vendored in tests/data/real_evtx/ (copied from SigmaHQ
+# regression_data, Detection Rule License 1.1, see NOTICE). They were recorded by the
+# SigmaHQ team on real Windows machines for OTHER rules; here they test that my rules
+# fire where they should and stay silent where they should.
+#
+# expect: [] means "no alert rule may fire on this file".
+
+samples:
+  sigmahq_powershell_base64_invoke.evtx:
+    expect: [dvl_001]        # powershell -exec bypass -e SQBuAHYA...
+  sigmahq_cmdkey_recon.evtx:
+    expect: [dvl_004]        # cmdkey /list (building block)
+  sigmahq_susp_local_system_owner_account_discovery.evtx:
+    expect: [dvl_004]        # WMIC useraccount get /ALL (missed by v1, added in v2)
+  sigmahq_schtasks_delete.evtx:
+    expect: []               # schtasks /delete must not look like /create
+  sigmahq_schtasks_disable.evtx:
+    expect: []               # schtasks /Change ... /disable
+  sigmahq_certutil_encode.evtx:
+    expect: []               # certutil -encode: not PowerShell, dvl_001 must stay silent
+  sigmahq_reg_add_run_key.evtx:
+    expect: []               # KNOWN GAP: Sysmon EID 1 only; dvl_003 reads EID 13 (registry)
+  sigmahq_powershell_adsi_create_user.evtx:
+    expect: []               # KNOWN GAP: [ADSI] user creation; dvl_008 only sees net.exe,
+                             # dvl_007 would need the Security log (not in this sample)

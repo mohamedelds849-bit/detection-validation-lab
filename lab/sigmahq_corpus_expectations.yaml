@@ -1,0 +1,19 @@
+# Whole SigmaHQ regression corpus (regression_data/, pinned commit in the workflow):
+# about 200 real EVTX recordings of attack techniques, made by SigmaHQ for their own
+# rules. Files are named <sigma-rule-uuid>.evtx.
+#
+# Only the files below may fire my rules. An ALERT from my rules on any other file
+# fails the gate (it would be either a false positive or a detection I did not
+# document); building-block hits elsewhere are only reported.
+#
+# Verified locally on 2026-10-11 with Chainsaw 2.16.5 and SigmaHQ commit
+# da9bb07d642a2826e89702445d32c795209ec108 (the corpus bundled in the Chainsaw
+# 2.16.5 "all_platforms+rules" release).
+
+samples:
+  6385697e-9f1b-40bd-8817-f4a91f40508e.evtx:
+    expect: [dvl_001]        # proc_creation_win_powershell_base64_invoke
+  07f8bdc2-c9b3-472a-9817-5a670b872f53.evtx:
+    expect: [dvl_004]        # proc_creation_win_cmdkey_recon
+  502b42de-4306-40b4-9596-6f590c81f073.evtx:
+    expect: [dvl_004]        # proc_creation_win_susp_local_system_owner_account_discovery
