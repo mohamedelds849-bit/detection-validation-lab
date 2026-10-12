@@ -26,7 +26,15 @@ detection:
     CommandLine|contains:
       - '/create'
       - '-create'
-  condition: all of selection_*
+  # v2: on the real Windows 10 baseline, 10 of 11 hits were Office Click-to-Run
+  # (parent under Program Files). Writing to Program Files needs admin rights, so a
+  # parent there is a weaker signal. See docs/TUNING.md.
+  filter_parent_program_files:
+    ParentImage|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  condition: all of selection_* and not 1 of filter_*
 falsepositives:
-  - Software installers and administrators creating legitimate tasks
+  - Software installers running from %TEMP% (example in the baseline - K-Lite codec pack)
+  - Administrators creating legitimate tasks
 level: medium

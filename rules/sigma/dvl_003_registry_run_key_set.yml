@@ -24,11 +24,27 @@ detection:
       - '\Software\Microsoft\Windows\CurrentVersion\RunOnce\'
       - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run\'
       - '\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\RunOnce\'
-  filter_program_files:
+  filter_writer_program_files:
     Image|startswith:
       - 'C:\Program Files\'
       - 'C:\Program Files (x86)\'
+  # v2 filters, from 16 hits on the real Windows 10 baseline (docs/TUNING.md):
+  # - the value starts a program that lives under Program Files (admin-only folder);
+  #   installers running from %TEMP% or msiexec wrote 10 of the 16 hits this way
+  filter_target_program_files:
+    Details|startswith:
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+      - '"C:\Program Files\'
+      - '"C:\Program Files (x86)\'
+  # - WiX "Burn" bundles (.NET runtime, Python installer) resume after reboot with
+  #   RunOnce "<Package Cache>\setup.exe /burn.runonce"
+  filter_burn_runonce:
+    Details|contains|all:
+      - '\Package Cache\'
+      - '/burn.runonce'
   condition: selection and not 1 of filter_*
 falsepositives:
-  - Per-user applications installed under AppData that register themselves at logon
+  - Per-user applications installed under AppData that register themselves at logon (Spotify in the baseline)
+  - OneDrive upgrade clean-up and grpconv RunOnce values (baseline)
 level: medium

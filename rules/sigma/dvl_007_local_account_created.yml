@@ -19,7 +19,14 @@ logsource:
 detection:
   selection:
     EventID: 4720
-  condition: selection
+  # v2: built-in accounts that Windows creates itself at first boot (2 of the 3 hits
+  # on the real Windows 10 baseline). The 3rd hit (the first user, created during
+  # OOBE) is kept: an environment allow-list handles it, see lab/known_fps.yaml.
+  filter_builtin:
+    TargetUserName:
+      - 'defaultuser0'
+      - 'WDAGUtilityAccount'
+  condition: selection and not filter_builtin
 falsepositives:
   - Provisioning of new employees or of service accounts (check the ticket)
   - First-boot setup of a new machine (defaultuser0)

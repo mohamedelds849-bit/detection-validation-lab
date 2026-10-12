@@ -3,7 +3,7 @@ id: c4aebf11-32d1-4493-aa07-1fb34fe77147
 status: test
 description: >
   Building block, not an alert. Records the execution of built-in tools used to learn
-  who we are and what the machine is (whoami, systeminfo, quser, qwinsta, cmdkey /list,
+  who we are and what the machine is (whoami, systeminfo, quser, qwinsta, cmdkey /list, wmic useraccount,
   net user / localgroup / group / accounts). Each one alone is normal admin activity;
   the correlation rule dvl_005 raises an alert when several of them run in a burst.
 references:
@@ -43,7 +43,14 @@ detection:
       - ' localgroup'
       - ' group'
       - ' accounts'
-  condition: selection_simple or (selection_cmdkey_img and selection_cmdkey_cmd) or (selection_net_img and selection_net_cmd)
+  # v2: added after a real SigmaHQ regression sample ("WMIC useraccount get /ALL")
+  # was missed by v1. Atomic T1033 test 1 uses the same command.
+  selection_wmic_img:
+    - Image|endswith: '\WMIC.exe'
+    - OriginalFileName: 'wmic.exe'
+  selection_wmic_cmd:
+    CommandLine|contains: 'useraccount'
+  condition: selection_simple or (selection_cmdkey_img and selection_cmdkey_cmd) or (selection_net_img and selection_net_cmd) or (selection_wmic_img and selection_wmic_cmd)
 falsepositives:
   - Administrators, login scripts and inventory agents (this is why it is only a building block)
 level: informational

@@ -28,15 +28,12 @@ detection:
         - 'PowerShell.EXE'
         - 'pwsh.dll'
   selection_flag:
-    CommandLine|contains:
-      - ' -e '
-      - ' -ec '
-      - ' -en'
-      - ' /e '
-      - ' /ec '
-      - ' /en'
+    # -EncodedCommand or any accepted abbreviation (-e, -ec, -en, -enc, ...) FOLLOWED by
+    # a base64 blob. v1 used plain "contains ' -en'" and fired on "-Encoding ascii"
+    # (Office setup, real Windows 10 baseline) - see docs/TUNING.md.
+    CommandLine|re: '(?i)\s[-/]e(c|n[a-z]*)?\s+["'']?[A-Za-z0-9+/=]{20,}'
   condition: all of selection_*
 falsepositives:
   - Management agents (SCCM, some RMM tools) that launch encoded PowerShell
-  - A command line that contains the text " -en" inside a quoted string
+  - A quoted string inside a command line that looks like " -e <20+ base64 characters>"
 level: medium
