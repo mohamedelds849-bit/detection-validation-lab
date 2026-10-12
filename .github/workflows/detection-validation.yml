@@ -1,0 +1,155 @@
+name: detection-validation
+
+# Four jobs, four kinds of evidence:
+#   unit       - lint (sigma check), unit tests, Chainsaw on 8 vendored REAL EVTX samples
+#   goodlog    - Gate 2: my rules on a REAL clean Windows 10 log baseline (Nextron evtx-baseline)
+#   corpus     - Gate 3: my rules on the whole SigmaHQ regression corpus (~200 REAL attack recordings)
+#   telemetry  - Gate 1: a REAL Windows runner with Sysmon; benign phase + 8 standard Atomic Red Team
+#                tests; my rules must fire on each test and stay silent on the benign phase.
+#                Then a mutation self-test proves the gate goes red when a rule breaks.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+  NEXTRON_BASELINE_VERSION: v0.8.5
+  NEXTRON_WIN10_SHA256: d48f1b328d48db6c6dfaa9b6e232dbb454d93e833c6e1248efc0faf690b6808e
+  SIGMAHQ_COMMIT: da9bb07d642a2826e89702445d32c795209ec108
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python scripts/get_chainsaw.py
+      - name: sigma check (pySigma validators)
+        run: sigma check rules/
+      - name: Unit + real-sample tests
+        run: python -m pytest -rs
+
+  goodlog:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install -r requirements.txt
+          python scripts/get_chainsaw.py
+      - name: Download the Windows 10 client baseline (real clean logs, SHA-256 checked)
+        run: |
+          mkdir -p work/baseline
+          curl -sSLf -o work/win10-client.tgz \
+            "https://github.com/NextronSystems/evtx-baseline/releases/download/${NEXTRON_BASELINE_VERSION}/win10-client.tgz"
+          echo "${NEXTRON_WIN10_SHA256}  work/win10-client.tgz" | sha256sum -c -
+          tar xzf work/win10-client.tgz -C work/baseline
+      - name: Hunt
+        run: python -m dvl hunt --evtx work/baseline --out work/goodlog-hits.json
+      - name: Gate 2 - every alert must be an accepted, documented false positive
+        run: python -m dvl goodlog --hits work/goodlog-hits.json --dataset nextron-win10-client --out work/goodlog.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: goodlog-report
+          path: |
+            work/goodlog.json
+            work/goodlog-hits.json
+
+  corpus:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install -r requirements.txt
+          python scripts/get_chainsaw.py
+      - name: Fetch SigmaHQ regression_data at a pinned commit (sparse)
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/SigmaHQ/sigma.git work/sigma
+          git -C work/sigma sparse-checkout set regression_data
+          git -C work/sigma checkout "${SIGMAHQ_COMMIT}"
+          find work/sigma/regression_data -name '*.evtx' | wc -l
+      - name: Hunt
+        run: python -m dvl hunt --evtx work/sigma/regression_data --out work/corpus-hits.json
+      - name: Gate 3 - only the documented samples may fire
+        run: python -m dvl samples --hits work/corpus-hits.json --expect lab/sigmahq_corpus_expectations.yaml --out work/corpus.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: corpus-report
+          path: work/corpus.json
+
+  telemetry:
+    needs: unit
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install dvl + Chainsaw
+        run: |
+          python -m pip install -r requirements.txt
+          python scripts/get_chainsaw.py
+      - name: Install telemetry (Sysmon + audit policy + Invoke-AtomicRedTeam)
+        run: ./lab/ci/Install-Telemetry.ps1
+      - name: Benign phase (near-misses, must not alert)
+        run: ./lab/ci/Invoke-BenignActivity.ps1
+      - name: Atomic phase (8 standard benign Atomic Red Team tests, each with cleanup)
+        run: ./lab/ci/Invoke-AtomicPhase.ps1
+      - name: Export EVTX + manifest
+        if: always()
+        run: ./lab/ci/Export-Evtx.ps1
+      - name: Hunt (Chainsaw + correlation)
+        run: python -m dvl hunt --evtx work/evtx --out work/telemetry-hits.json
+      - name: Gate 1 - expected detections fired, benign phase silent
+        run: python -m dvl telemetry --hits work/telemetry-hits.json --manifest work/manifest.json --out work/telemetry.json
+      - name: Coverage layer (ATT&CK Navigator) from this run
+        if: always()
+        run: python -m dvl navigator --out work/coverage-layer-ci.json --telemetry-report work/telemetry.json
+      - name: Mutation self-test - a broken rule must turn the gate red
+        run: |
+          Copy-Item -Recurse rules work/mutant-rules
+          $f = 'work/mutant-rules/sigma/dvl_006_mshta_spawns_shell.yml'
+          (Get-Content -Raw $f) -replace "\\mshta\.exe'", "\mshta_MUTANT.exe'" | Set-Content $f
+          python -m dvl --rules work/mutant-rules hunt --evtx work/evtx --out work/mutant-hits.json
+          python -m dvl --rules work/mutant-rules telemetry --hits work/mutant-hits.json --manifest work/manifest.json
+          if ($LASTEXITCODE -ne 1) { Write-Error "gate did not fail on the mutant (exit $LASTEXITCODE)"; exit 1 }
+          Write-Host "OK: the gate failed on the mutant, as it should"
+          exit 0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: real-telemetry
+          path: |
+            work/evtx/
+            work/manifest.json
+            work/telemetry.json
+            work/telemetry-hits.json
+            work/coverage-layer-ci.json

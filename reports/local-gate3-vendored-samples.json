@@ -1,0 +1,83 @@
+{
+ "gate": "samples",
+ "passed": true,
+ "samples": [
+  {
+   "sample": "sigmahq_certutil_encode.evtx",
+   "expected": [],
+   "fired": [],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_cmdkey_recon.evtx",
+   "expected": [
+    "dvl_004"
+   ],
+   "fired": [
+    "dvl_004"
+   ],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_powershell_adsi_create_user.evtx",
+   "expected": [],
+   "fired": [],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_powershell_base64_invoke.evtx",
+   "expected": [
+    "dvl_001"
+   ],
+   "fired": [
+    "dvl_001"
+   ],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_reg_add_run_key.evtx",
+   "expected": [],
+   "fired": [],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_schtasks_delete.evtx",
+   "expected": [],
+   "fired": [],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_schtasks_disable.evtx",
+   "expected": [],
+   "fired": [],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  },
+  {
+   "sample": "sigmahq_susp_local_system_owner_account_discovery.evtx",
+   "expected": [
+    "dvl_004"
+   ],
+   "fired": [
+    "dvl_004"
+   ],
+   "missing": [],
+   "unexpected": [],
+   "status": "PASS"
+  }
+ ],
+ "unlisted_files_with_hits": []
+}

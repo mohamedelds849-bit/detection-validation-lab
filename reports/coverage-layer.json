@@ -1,0 +1,85 @@
+{
+ "name": "detection-validation-lab coverage",
+ "versions": {
+  "attack": "19",
+  "navigator": "5.1.0",
+  "layer": "4.5"
+ },
+ "domain": "enterprise-attack",
+ "description": "Green: fired on real Sysmon telemetry in CI. Yellow: rule only.",
+ "techniques": [
+  {
+   "techniqueID": "T1027.010",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_001 PowerShell Launched With an Encoded Command",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1033",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_004 Local Reconnaissance Tool Executed (Building Block); dvl_005 Burst of Local Reconnaissance Commands",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1053.005",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_002 Scheduled Task Created With schtasks.exe",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1059.001",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_001 PowerShell Launched With an Encoded Command",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1082",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_004 Local Reconnaissance Tool Executed (Building Block); dvl_005 Burst of Local Reconnaissance Commands",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1087.001",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_004 Local Reconnaissance Tool Executed (Building Block); dvl_005 Burst of Local Reconnaissance Commands",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1136.001",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_007 Local User Account Created (Security 4720); dvl_008 Local User Added With net.exe",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1218.005",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_006 Mshta Spawns a Shell or Script Interpreter",
+   "enabled": true
+  },
+  {
+   "techniqueID": "T1547.001",
+   "score": 1,
+   "color": "#ffe766",
+   "comment": "dvl_003 Value Written Under a Registry Run Key",
+   "enabled": true
+  }
+ ],
+ "legendItems": [
+  {
+   "label": "validated on real telemetry (CI)",
+   "color": "#8ec843"
+  },
+  {
+   "label": "rule written, not proven",
+   "color": "#ffe766"
+  }
+ ]
+}

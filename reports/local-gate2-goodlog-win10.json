@@ -1,0 +1,46 @@
+{
+ "gate": "goodlog",
+ "dataset": "nextron-win10-client",
+ "passed": true,
+ "alert_hits": 5,
+ "building_block_hits": 1,
+ "per_rule": {
+  "dvl_002": 1,
+  "dvl_003": 3,
+  "dvl_007": 1
+ },
+ "accepted": [
+  {
+   "rule": "dvl_007",
+   "time": "2022-02-07T11:59:38.728276+00:00",
+   "detail": "user",
+   "reason": "First local account created by Windows setup (OOBE): the subject is the machine account, the account is the one the owner chose at install. Expected once per new machine."
+  },
+  {
+   "rule": "dvl_003",
+   "time": "2022-02-08T11:48:42.692977+00:00",
+   "detail": "HKU\\S-1-5-21-1402826787-2759305201-2932496751-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\Uninstall 21.220.1024.0005",
+   "reason": "OneDrive updater: RunOnce \"Uninstall <version>\" removes the old version folder at next logon (cmd.exe rmdir). Written by the OneDrive setup running from %TEMP%."
+  },
+  {
+   "rule": "dvl_002",
+   "time": "2022-02-08T11:49:09.964151+00:00",
+   "detail": "\"C:\\Windows\\system32\\schtasks.exe\" /Create /TN \"klcp_update\" /XML \"C:\\Users\\user\\AppData\\Local\\Temp\\is-LSRFQ.tmp\\klcp_update_task.xml\" /F",
+   "reason": "K-Lite Codec Pack installer (Inno Setup, extracted to %TEMP%\\is-*.tmp) creates its update task from an XML file. Installers from %TEMP% cannot be filtered in the rule (attackers run from %TEMP% too), so this one is accepted by name."
+  },
+  {
+   "rule": "dvl_003",
+   "time": "2022-02-08T11:58:08.544540+00:00",
+   "detail": "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\GrpConv",
+   "reason": "grpconv (Windows Program Group Converter) RunOnce set by an installer. Built-in Windows binary with a fixed argument."
+  },
+  {
+   "rule": "dvl_003",
+   "time": "2022-02-08T12:26:29.169512+00:00",
+   "detail": "HKU\\S-1-5-21-1402826787-2759305201-2932496751-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Spotify",
+   "reason": "Spotify (per-user install in AppData) registers itself in HKCU Run. A per-user app in a user-writable folder is exactly what malware also does, so the rule is not changed; the exact app + path is accepted for this machine only."
+  }
+ ],
+ "unexpected": [],
+ "stale_allowlist_entries": []
+}
